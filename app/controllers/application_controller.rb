@@ -17,13 +17,13 @@ class ApplicationController < Sinatra::Base
 	end
 
 	post "/signup" do
-		user = User.new(:username => params[:username], :password => [:password])
-
-		if user.save
+		if params[:username] && params[:password] != ""
+			user = User.new(:username => params[:username], :password => [:password])
 			redirect "/login"
 		else
 			redirect "/failure"
 		end
+
 	end
 
 	get "/login" do
@@ -33,13 +33,14 @@ class ApplicationController < Sinatra::Base
 
 	post "/login" do
 		user = User.find_by(:username => params[:username])
-		if user
-			redirect "/success"
+	  
+		if user && user.authenticate(params[:password])
+		  session[:user_id] = user.id
+		  redirect "/success"
 		else
-			redirect "/failure"
+		  redirect "/failure"
 		end
-		#your code here!
-	end
+	  end 
 
 	get "/success" do
 		if logged_in?
